@@ -26,6 +26,7 @@ public class DefaultAnalysisPath implements AnalysisPath {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAnalysisPath.class);
 
     private static final Class[] MAPPINGS = new Class[]{
+            RequestMapping.class,
             PostMapping.class,
             GetMapping.class,
             PutMapping.class,
@@ -35,29 +36,49 @@ public class DefaultAnalysisPath implements AnalysisPath {
 
     @Override
     public String analysis(ProceedingJoinPoint pjp,String path) {
-        MethodSignature ms = (MethodSignature) pjp.getSignature();
-        return analysisMethodPath(ms.getMethod());
+        return analysisPath(pjp);
     }
 
-    private String analysisMethodPath(Method method){
-        RequestMapping mapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-        if (mapping != null){
-            if (mapping.path().length != 0){
-                // todo 暂时只取第一个
-                return mapping.path()[0];
-            }
+    private String analysisPath(ProceedingJoinPoint pjp){
+        String parentPath = null;
+        String methodPath = null;
+        StringBuilder result = new StringBuilder();
+        MethodSignature ms = (MethodSignature) pjp.getSignature();
+        Method method = ms.getMethod();
+        try {
+            Class<?> parentClass = Class.forName(pjp.getSignature().getDeclaringTypeName());
+            Annotation annotation;
             for (Class aClass : MAPPINGS) {
-                Annotation annotation = AnnotationUtils.findAnnotation(method, aClass);
-                if (annotation != null){
-                    Method[] declaredMethods = annotation.annotationType().getDeclaredMethods();
-                    for (Method declaredMethod : declaredMethods) {
-                        if (declaredMethod.getName().contains("path")){
-                            try {
-                                return ((String[]) declaredMethod.invoke(annotation))[0];
-                            } catch (IllegalAccessException | InvocationTargetException e) {
-                                LOGGER.error("获取路径失败！",e);
-                            }
-                        }
+                // 找到目标类上的路径
+                annotation = AnnotationUtils.findAnnotation(parentClass, aClass);
+                if (annotation != null && (parentPath = doAnalysis(annotation)) != null) {
+                    result.append(parentPath);
+                }
+                // 找到方法上的路径
+                annotation = AnnotationUtils.findAnnotation(method, aClass);
+                if (annotation != null && (methodPath = doAnalysis(annotation)) != null) {
+                    result.append(methodPath);
+                }
+                if (parentPath != null && methodPath != null){
+                    return result.toString();
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            LOGGER.error("获取父级路径失败！",e);
+        }
+        return result.toString();
+    }
+
+    private String doAnalysis(Annotation annotation){
+        if (annotation != null){
+            Method[] declaredMethods = annotation.annotationType().getDeclaredMethods();
+            for (Method declaredMethod : declaredMethods) {
+                if (declaredMethod.getName().contains("path")){
+                    try {
+                        String[] invoke = (String[]) declaredMethod.invoke(annotation);
+                        return invoke.length == 0 ? null : invoke[0];
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        LOGGER.error("获取方法路径失败！",e);
                     }
                 }
             }

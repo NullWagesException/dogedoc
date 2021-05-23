@@ -6,6 +6,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 /**
  * @author zhengfa
  * @date 2021年05月17日 19:57:00
@@ -16,8 +18,12 @@ import org.springframework.stereotype.Component;
 public class DefaultAnalysisParam implements AnalysisParam {
 
     @Override
-    public String analysisRequest(Object[] args,String request){
-        return JSON.toJSONString(args[0]);
+    public Map<String,Object> analysisRequest(Object[] args, Map<String,Object> request){
+        for (Object arg : args) {
+            String jsonString = JSON.toJSONString(arg);
+            request.putAll(JSON.parseObject(jsonString, Map.class));
+        }
+        return request;
     }
 
     @Override

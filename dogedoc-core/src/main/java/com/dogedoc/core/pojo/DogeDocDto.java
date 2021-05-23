@@ -8,6 +8,11 @@ package com.dogedoc.core.pojo;
 public class DogeDocDto {
 
     /**
+     * 请求头携带的参数
+     */
+    private String header;
+
+    /**
      * 请求体
      */
     private String request;

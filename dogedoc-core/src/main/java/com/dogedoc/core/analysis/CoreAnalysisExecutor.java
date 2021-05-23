@@ -1,13 +1,17 @@
 package com.dogedoc.core.analysis;
 
+import com.alibaba.fastjson.JSON;
 import com.dogedoc.core.analysis.param.AnalysisParam;
 import com.dogedoc.core.analysis.path.AnalysisPath;
 import com.dogedoc.core.analysis.type.AnalysisType;
+import com.dogedoc.core.pojo.DogeDocDto;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhengfa
@@ -26,36 +30,56 @@ public class CoreAnalysisExecutor {
     @Autowired
     private List<AnalysisType> analysisTypes;
 
-    public String analysisRequest(Object[] args){
-        String request = null;
+    public void doAnalysis(ProceedingJoinPoint pjp, Object proceed) {
+        init();
+        analysisPath(pjp);
+        analysisType(pjp);
+        analysisRequest(pjp.getArgs());
+        analysisResponse(proceed);
+        clear();
+    }
+
+    public void analysisRequest(Object[] args){
+        DogeDocDto dogeDocDto = analysisParams.get(0).data.get();
+        Map<String,Object> request = new HashMap<>();
         for (AnalysisParam analysisParam : analysisParams) {
             request = analysisParam.analysisRequest(args,request);
         }
-        return request;
+        dogeDocDto.setRequest(JSON.toJSONString(request));
     }
 
-    public String analysisResponse(Object obj){
+    public void analysisResponse(Object obj){
+        DogeDocDto dogeDocDto = analysisParams.get(0).data.get();
         String response = null;
         for (AnalysisParam analysisParam : analysisParams) {
             response = analysisParam.analysisResponse(obj,response);
         }
-        return response;
+        dogeDocDto.setResponse(response);
     }
 
-    public String analysisPath(ProceedingJoinPoint pjp){
+    public void analysisPath(ProceedingJoinPoint pjp){
+        DogeDocDto dogeDocDto = analysisParams.get(0).data.get();
         String path = null;
         for (AnalysisPath analysisPath : analysisPaths) {
             path = analysisPath.analysis(pjp,path);
         }
-        return path;
+        dogeDocDto.setPath(path);
     }
 
-    public String analysisType(ProceedingJoinPoint pjp){
+    public void analysisType(ProceedingJoinPoint pjp){
+        DogeDocDto dogeDocDto = analysisParams.get(0).data.get();
         String type = null;
         for (AnalysisType analysisType : analysisTypes) {
             type = analysisType.analysis(pjp,type);
         }
-        return type;
+        dogeDocDto.setType(type);
     }
 
+    public void init(){
+        analysisParams.get(0).data.set(new DogeDocDto());
+    }
+
+    public void clear(){
+        analysisParams.get(0).data.remove();
+    }
 }
