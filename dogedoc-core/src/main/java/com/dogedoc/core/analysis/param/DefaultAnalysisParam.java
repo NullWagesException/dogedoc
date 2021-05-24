@@ -20,6 +20,7 @@ public class DefaultAnalysisParam implements AnalysisParam {
     @Override
     public Map<String,Object> analysisRequest(Object[] args, Map<String,Object> request){
         for (Object arg : args) {
+            // todo 如果参数中有RequestParam就会报错
             String jsonString = JSON.toJSONString(arg);
             request.putAll(JSON.parseObject(jsonString, Map.class));
         }

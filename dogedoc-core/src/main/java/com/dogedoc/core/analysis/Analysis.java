@@ -9,6 +9,9 @@ import com.dogedoc.core.pojo.DogeDocDto;
  */
 public interface Analysis {
 
+    /**
+     * 事实上不用ThreadLocal也没关系，我觉得在生成接口文档的时候，不会有人会同时去发两个请求……
+     */
     ThreadLocal<DogeDocDto> data = new ThreadLocal<>();
 
 }

@@ -1,5 +1,7 @@
 package com.dogedoc.core.sender;
 
+import com.dogedoc.core.pojo.DogeDocDto;
+
 /**
  * @author zhengfa
  * @date 2021年05月17日 20:15:00
@@ -7,6 +9,6 @@ package com.dogedoc.core.sender;
  */
 public interface DogeDocSenderFactory {
 
-    void structureDoc(String request,String response);
+    void structureDoc(DogeDocDto dogeDocDto);
 
 }

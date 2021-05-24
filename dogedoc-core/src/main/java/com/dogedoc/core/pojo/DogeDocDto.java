@@ -76,4 +76,24 @@ public class DogeDocDto {
     public void setType(String type) {
         this.type = type;
     }
+
+    public String getHeader() {
+        return header;
+    }
+
+    public void setHeader(String header) {
+        this.header = header;
+    }
+
+    @Override
+    public String toString() {
+        return "DogeDocDto{" +
+                "header='" + header + '\'' +
+                ", request='" + request + '\'' +
+                ", response='" + response + '\'' +
+                ", methodDescribe='" + methodDescribe + '\'' +
+                ", path='" + path + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

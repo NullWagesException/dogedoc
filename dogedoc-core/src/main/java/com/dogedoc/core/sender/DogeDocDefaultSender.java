@@ -1,5 +1,6 @@
 package com.dogedoc.core.sender;
 
+import com.dogedoc.core.pojo.DogeDocDto;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,8 +12,7 @@ import org.springframework.stereotype.Component;
 public class DogeDocDefaultSender implements DogeDocSenderFactory {
 
     @Override
-    public void structureDoc(String request, String response) {
-        System.out.println(request);
-        System.out.println(response);
+    public void structureDoc(DogeDocDto dogeDocDto) {
+        System.out.println(dogeDocDto);
     }
 }

@@ -30,13 +30,14 @@ public class CoreAnalysisExecutor {
     @Autowired
     private List<AnalysisType> analysisTypes;
 
-    public void doAnalysis(ProceedingJoinPoint pjp, Object proceed) {
-        init();
+    public DogeDocDto doAnalysis(ProceedingJoinPoint pjp, Object proceed) {
+        DogeDocDto dto = init();
         analysisPath(pjp);
         analysisType(pjp);
         analysisRequest(pjp.getArgs());
         analysisResponse(proceed);
         clear();
+        return dto;
     }
 
     public void analysisRequest(Object[] args){
@@ -75,8 +76,10 @@ public class CoreAnalysisExecutor {
         dogeDocDto.setType(type);
     }
 
-    public void init(){
-        analysisParams.get(0).data.set(new DogeDocDto());
+    public DogeDocDto init(){
+        DogeDocDto dogeDocDto = new DogeDocDto();
+        analysisParams.get(0).data.set(dogeDocDto);
+        return dogeDocDto;
     }
 
     public void clear(){
